@@ -3,6 +3,7 @@ package net.javaguides.ems.service.impl;
 import lombok.AllArgsConstructor;
 import net.javaguides.ems.dto.EmployeeDto;
 import net.javaguides.ems.entity.Employee;
+import net.javaguides.ems.exception.ResourceNotFoundException;
 import net.javaguides.ems.mapper.EmployeeMapper;
 import net.javaguides.ems.repository.EmployeeRepository;
 import net.javaguides.ems.service.EmployeeService;
@@ -39,5 +40,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employees.stream()
                 .map((employee) -> EmployeeMapper.mapToEmployeeDto(employee))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public EmployeeDto updateEmployeeById(Long employeeId, EmployeeDto updatedEmployee) {
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(
+                () -> new ResourceNotFoundException("Employee does not exist with given id : " + employeeId)
+        );
+        employee.setFirstName(updatedEmployee.getFirstName());
+        employee.setLastName(updatedEmployee.getLastName());
+        employee.setEmail(updatedEmployee.getEmail());
+
+        Employee updatedEmployeeObject = employeeRepository.save(employee);
+        return EmployeeMapper.mapToEmployeeDto(updatedEmployeeObject);
     }
 }
