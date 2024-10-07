@@ -3,6 +3,7 @@ package net.javaguides.ems.service.impl;
 import lombok.AllArgsConstructor;
 import net.javaguides.ems.dto.EmployeeDto;
 import net.javaguides.ems.entity.Employee;
+import net.javaguides.ems.exception.EmailAlreadyExistsException;
 import net.javaguides.ems.exception.ResourceNotFoundException;
 import net.javaguides.ems.repository.EmployeeRepository;
 import net.javaguides.ems.service.EmployeeService;
@@ -10,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +24,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeDto createEmployee(EmployeeDto employeeDto) {
+        Optional<Employee> optionalEmployee = employeeRepository.findByEmail(employeeDto.getEmail());
+        if (optionalEmployee.isPresent()) {
+            throw new EmailAlreadyExistsException("Email Already Exists for an Employee.");
+        }
         Employee employee = modelMapper.map(employeeDto, Employee.class);
         Employee savedEmployee = employeeRepository.save(employee);
         return modelMapper.map(savedEmployee, EmployeeDto.class);
