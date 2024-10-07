@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import net.javaguides.ems.dto.EmployeeDto;
 import net.javaguides.ems.entity.Employee;
 import net.javaguides.ems.exception.ResourceNotFoundException;
-import net.javaguides.ems.mapper.EmployeeMapper;
 import net.javaguides.ems.repository.EmployeeRepository;
 import net.javaguides.ems.service.EmployeeService;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.lang.module.ResolutionException;
@@ -19,11 +19,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private EmployeeRepository employeeRepository;
 
+    private ModelMapper modelMapper;
+
     @Override
     public EmployeeDto createEmployee(EmployeeDto employeeDto) {
-        Employee employee = EmployeeMapper.mapToEmployee(employeeDto);
+        Employee employee = modelMapper.map(employeeDto, Employee.class);
         Employee savedEmployee = employeeRepository.save(employee);
-        return EmployeeMapper.mapToEmployeeDto(savedEmployee);
+        return modelMapper.map(savedEmployee, EmployeeDto.class);
     }
 
     @Override
@@ -31,14 +33,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(
                         () -> new ResolutionException("Employee does not exist with given id : " + employeeId));
-        return EmployeeMapper.mapToEmployeeDto(employee);
+        return modelMapper.map(employee, EmployeeDto.class);
     }
 
     @Override
     public List<EmployeeDto> getAllEmployees() {
         List<Employee> employees = employeeRepository.findAll();
         return employees.stream()
-                .map((employee) -> EmployeeMapper.mapToEmployeeDto(employee))
+                .map((employee) -> modelMapper.map(employee, EmployeeDto.class))
                 .collect(Collectors.toList());
     }
 
@@ -52,7 +54,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setEmail(updatedEmployee.getEmail());
 
         Employee updatedEmployeeObject = employeeRepository.save(employee);
-        return EmployeeMapper.mapToEmployeeDto(updatedEmployeeObject);
+        return modelMapper.map(updatedEmployeeObject, EmployeeDto.class);
     }
 
     @Override
